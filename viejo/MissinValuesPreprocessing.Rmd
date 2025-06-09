@@ -1,0 +1,256 @@
+---
+title: "MissingValuesPreprovessing"
+output: html_document
+date: "2022-09-18"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+Ponemos la carpeta en la que estamos y cargamos el dataset elegido
+
+```{r}
+setwd("/home/pablesky/Documentos/MD-FIB")
+dd<- read.csv("weathertrain.csv")
+```
+
+Vamos a mirar de cada columna como está estructurado Cargamos la
+estructura de la tabla.
+
+```{r}
+dimensiones <- dim(dd)
+filas <- dimensiones[1]
+columnas <- dimensiones[2]
+```
+
+Hacemos el bucle para ir comprovando.
+
+```{r}
+indexColumnas <- (2:columnas)
+for (i in indexColumnas) {
+  columnTitle <- names(dd)[i]
+  columnaValores <- dd[,i]
+  print(columnTitle)
+  print(class(columnaValores))
+  print(table(columnaValores, useNA = "ifany"))
+}
+```
+
+Vamos a ver cuales son las columnas que son carácteres
+
+```{r}
+indexColumnas <- (2:columnas)
+for (i in indexColumnas) {
+  if (class(dd[,i]) == "character") {
+    print(i)
+    print(names(dd)[i])
+    print(table(dd[,i], useNA="ifany"))
+  }
+}
+
+```
+
+Como podemos ver, tenemos cuatro clases que tienen valor categórico:
+Location -\> Esta podemos eliminarla? 8.WindGustDir --\| 10.WindDir9am
+--\| -\> podemos cambiar por números como se muestra abajo o
+haceronehotencodding 11.WindDir3pm --\|
+
+PD:One hot encoding no es posible, hay problemas con el tamaño del
+vector.
+
+E ENE ESE N NE NNE NNW NW S SE SSE SSW SW W WNW WSW <NA>;\
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 NA
+
+22.RainToday --\> Esta es una variable binaria Yes/No, podemos
+convertirla a 1 = Yes, 0 = No
+
+Primero haremos la facil y cambiaremos RainToday por 0 y 1
+
+```{r}
+dd[,23][dd[,23] == 1] = "Yes"
+dd[,23][dd[,23] == 0] = "No"
+print(class(dd[,23]))
+print(table(dd[,23], useNA="ifany"))
+```
+
+Acortamos nombre de las ciudades
+
+```{r}
+dd[,2][dd[,2] == "Adelaide"] = "ADEL"
+dd[,2][dd[,2] == "Albany"] = "ALB"
+dd[,2][dd[,2] == "Albury"] = "ABX"
+dd[,2][dd[,2] == "AliceSprings"] = "ASP"
+dd[,2][dd[,2] == "BadgerysCreek"] = "BC"
+dd[,2][dd[,2] == "Ballarat"] = "BLL"
+dd[,2][dd[,2] == "Bendigo"] = "BXG"
+dd[,2][dd[,2] == "Brisbane"] = "BNE"
+dd[,2][dd[,2] == "Cairns"] = "CNS"
+dd[,2][dd[,2] == "Canberra"] = "CBR"
+dd[,2][dd[,2] == "Cobar"] = "COB"
+dd[,2][dd[,2] == "CoffsHarbour"] = "CHR"
+dd[,2][dd[,2] == "Dartmoor"] = "DTR"
+dd[,2][dd[,2] == "Darwin"] = "DRW"
+dd[,2][dd[,2] == "GoldCoast"] = "GCT"
+dd[,2][dd[,2] == "Hobart"] = "HBT"
+dd[,2][dd[,2] == "Katherine"] = "KTE"
+dd[,2][dd[,2] == "Launceston"] = "LCT"
+dd[,2][dd[,2] == "Melbourne"] = "MBE"
+dd[,2][dd[,2] == "MelbourneAirport"] = "MBEA"
+dd[,2][dd[,2] == "Mildura"] = "MLD"
+dd[,2][dd[,2] == "Moree"] = "MEE"
+dd[,2][dd[,2] == "MountGambier"] = "MGR"
+dd[,2][dd[,2] == "MountGinini"] = "MGI"
+dd[,2][dd[,2] == "Newcastle"] = "NWC"
+dd[,2][dd[,2] == "Nhil"] = "NHIL"
+dd[,2][dd[,2] == "NorahHead"] = "NHD"
+dd[,2][dd[,2] == "NorfolkIsland"] = "NFI"
+dd[,2][dd[,2] == "Nuriootpa"] = "NTA"
+dd[,2][dd[,2] == "PearceRAAF"] = "PRF"
+dd[,2][dd[,2] == "Penrith"] = "PRT"
+dd[,2][dd[,2] == "Perth"] = "PRH"
+dd[,2][dd[,2] == "PerthAirport"] = "PRHA"
+dd[,2][dd[,2] == "Portland"] = "PRL"
+dd[,2][dd[,2] == "Richmond"] = "RHD"
+dd[,2][dd[,2] == "Sale"] = "SALE"
+dd[,2][dd[,2] == "SalmonGums"] = "SGS"
+dd[,2][dd[,2] == "Sydney"] = "SYD"
+dd[,2][dd[,2] == "SydneyAirport"] = "SYDA"
+dd[,2][dd[,2] == "Townsville"] = "TVE"
+dd[,2][dd[,2] == "Tuggeranong"] = "TGG"
+dd[,2][dd[,2] == "Uluru"] = "URU"
+dd[,2][dd[,2] == "WaggaWagga"] = "WAG"
+dd[,2][dd[,2] == "Walpole"] = "WPE"
+dd[,2][dd[,2] == "Watsonia"] = "WTS"
+dd[,2][dd[,2] == "Williamtown"] = "WLT"
+dd[,2][dd[,2] == "Witchcliffe"] = "WTF"
+dd[,2][dd[,2] == "Wollongong"] = "WLG"
+dd[,2][dd[,2] == "Woomera"] = "WMA"
+print(class(dd[,2]))
+print(table(dd[,2], useNA="ifany"))
+```
+
+Comprobamos que los valores NA no son aleatorios
+
+```{r}
+titulos <- table(dd[,2])
+columna7 <- c()
+for (i in names(titulos)) {
+  temp <- dd[dd$Location == i,]
+  
+  if (dim(table(temp[,17],useNA="ifany")) == 1) {
+    columna7 <- append(columna7, i)
+  }
+}
+
+print(columna7)
+
+columna6 <- c()
+for (i in names(titulos)) {
+  temp <- dd[dd$Location == i,]
+  
+  if (dim(table(temp[,16],useNA="ifany")) == 1) {
+    columna6 <- append(columna6, i)
+  }
+}
+
+print(columna6)
+```
+
+```{r}
+dd[,6]<-NULL
+dd[,6]<-NULL
+dd[,16]<-NULL
+dd[,16]<-NULL
+
+write.table(dd, sep = ",","limpio.csv")
+```
+
+Checkpoint
+
+```{r}
+setwd("/home/pablesky/Documentos/MD-FIB")
+dd<- read.csv("limpio.csv")
+
+dimensiones <- dim(dd)
+filas <- dimensiones[1]
+columnas <- dimensiones[2]
+
+indexColumnas <- (2:columnas)
+for (i in indexColumnas) {
+  columnTitle <- names(dd)[i]
+  columnaValores <- dd[,i]
+  print(columnTitle)
+  print(sum(is.na(columnaValores)))
+}
+
+```
+
+numVariables son las columnas que tienen categoria numerica, se podía
+hacer automatico pero me da un poquito de perecita :)
+
+aux es la tabla con solo las columnas numVariables
+
+noNA es la tabla con las filas que no tienen ningun valor NA, si no
+dropeamos
+
+Perdemos solamente 15707 de 99516 filas.
+
+```{r}
+library(class)
+
+numVariables<-c(3, 4, 5, 7, 10, 11, 12, 13, 14, 15, 16, 17)
+aux<-dd[,numVariables]
+noNA <- aux[rowSums(is.na(aux)) == 0,]
+
+dim(aux)
+dim(noNA)
+perdidas <- dim(aux)[1] - dim(noNA)[1]
+print("hemos dropeado este numero de filas: ")
+print(perdidas)
+names(aux)
+```
+
+```{r}
+numVariables<-c(3, 4, 5, 7, 10, 11, 12, 13, 14, 15, 16, 17)
+
+library(class)
+
+# FOR EVERY INDIVIDUAL WITH MISSING Incomes LOOK FOR THE MOST SIMILAR INDIVIDUAL 
+# wrt REMAINING VARIABLES AND COPY THE VALUE OF INGRESSOS ON THE FIRST 
+#For more robustness average the values of k-NN in general (with small k)
+
+
+# For a single variable:
+# Build an artificial matrix with the full numerical variables
+
+mediana <- aux
+for(c in 1:ncol(aux)) {  
+  mediana[is.na(aux[,c]),c] <- mean(mediana[,c], na.rm = TRUE)
+}
+
+fullVariables<-c(3, 4, 5, 7, 10, 11, 12, 13, 14, 15, 16, 17)
+for (i in fullVariables) {
+  aux<-dd[,fullVariables]
+  dim(aux)
+  names(aux)
+  
+  aux1 <- mediana[!is.na(dd[,i]),]
+  dim(aux1)
+  aux2 <- mediana[is.na(dd[,i]),]
+  dim(aux2)
+  
+  knn.ing = knn(aux1,aux2,dd[,i][!is.na(dd[,i])])   
+
+  original<-dd[,i]
+  dd[,i][is.na(dd[,i])] <- as.numeric(levels(knn.ing))
+
+  hist(dd[,i])
+  summary(dd[,i])
+  hist(original)
+  summary(original)
+}
+
+dd<-read.csv("sinMissings.csv")
+colnames(dd)<-c("Row", "Loc", "MinT", "MaxT", "Rain", "WDir", "WSpeed", "WDir9", "WDir3", "WSpeed9", "WSpeed3", "Hum9", "Hum3", "Press9", "Press3", "Temp9", "Temp3", "Rtod", "RTom")
+write.table(dd, sep = ",","sinMissings.csv")
+```
